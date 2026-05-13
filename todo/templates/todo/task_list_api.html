@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .add-task {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .add-task input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .add-task input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #fc8181;
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger:hover {
+            background: #f56565;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar button {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .filter-bar button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .task-item:hover {
+            background: #f9f9f9;
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .task-title.done {
+            text-decoration: line-through;
+            color: #a0aec0;
+        }
+
+        .task-date {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            margin-right: auto;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .empty {
+            text-align: center;
+            color: #a0aec0;
+            padding: 3rem;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .add-task {
+                flex-direction: column;
+            }
+
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 my tasks </h1>
+
+        <!-- Add Task Form -->
+        <div class="add-task">
+            <input type="text" id="taskInput" placeholder="write new task..." />
+            <button class="btn btn-primary" onclick="addTask()">➕ add</button>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-bar">
+            <button class="active" onclick="filterTasks('all')">all</button>
+            <button onclick="filterTasks('pending')">is not done</button>
+            <button onclick="filterTasks('done')">is done</button>
+        </div>
+
+        <!-- Message Area -->
+        <div id="message"></div>
+
+        <!-- Task List -->
+        <ul class="task-list" id="taskList">
+            <div class="loading">⏳ loading...</div>
+        </ul>
+    </div>
+
+    <script>
+        // ====== CONFIGURATION ======
+        const API_BASE = 'http://127.0.0.1:8000/api/v1';
+        const TOKEN = 'Token 7882d40736b79682a1bb8e35a28f8521ce24306d'; // ← توکن خودت رو اینجا بذار
+
+        let allTasks = [];
+        let currentFilter = 'all';
+
+        // ====== HEADERS ======
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': TOKEN
+        };
+
+        // ====== LOAD TASKS ON PAGE LOAD ======
+        window.addEventListener('DOMContentLoaded', loadTasks);
+
+        async function loadTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks/`, { headers });
+                if (!response.ok) throw new Error('خطا در دریافت تسک‌ها');
+                allTasks = await response.json();
+                renderTasks();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // ====== RENDER TASKS ======
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            let filteredTasks = allTasks;
+
+            if (currentFilter === 'done') {
+                filteredTasks = allTasks.filter(t => t.is_done);
+            } else if (currentFilter === 'pending') {
+                filteredTasks = allTasks.filter(t => !t.is_done);
+            }
+
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = '<div class="empty">🎉 هیچ تسکی پیدا نشد!</div>';
+                return;
+            }
+
+            taskList.innerHTML = filteredTasks.map(task => `
+                <li class="task-item">
+                    <div class="task-content">
+                        <input 
+                            type="checkbox" 
+                            class="checkbox" 
+                            ${task.is_done ? 'checked' : ''} 
+                            onchange="toggleTask(${task.id})"
+                        />
+                        <span class="task-title ${task.is_done ? 'done' : ''}">
+                            ${task.title}
+                        </span>
+                        <span class="task-date">
+                            ${new Date(task.created_at).toLocaleDateString('fa-IR')}
+                        </span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-outline btn-sm" onclick="viewDetail('${task.detail_url}')">
+                            🔍 جزئیات
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">
+                            🗑️ حذف
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // ====== ADD TASK ======
+        async function addTask() {
+            const input = document.getElementById('taskInput');
+            const title = input.value.trim();
+
+            if (!title) {
+                showMessage('لطفاً عنوان تسک رو بنویس!', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/tasks/`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ title, description: '' })
+                });
+
+                if (!response.ok) throw new Error('خطا در ایجاد تسک');
+                const newTask = await response.json();
+                allTasks.unshift(newTask);
+                input.value = '';
+                renderTasks();
+                showMessage('✅ تسک با موفقیت اضافه شد!', 'success');
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // ====== TOGGLE TASK COMPLETE ======
+        async function toggleTask(taskId) {
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${taskId}/toggle_complete/`, {
+                    method: 'POST',
+                    headers
+                });
+
+                if (!response.ok) throw new Error('خطا در تغییر وضعیت');
+                const updated = await response.json();
+
+                // Update local state
+                const taskIndex = allTasks.findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    allTasks[taskIndex].is_done = updated.is_done;
+                }
+                renderTasks();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // ====== DELETE TASK ======
+        async function deleteTask(taskId) {
+            if (!confirm('مطمئنی می‌خوای حذف کنی؟')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${taskId}/`, {
+                    method: 'DELETE',
+                    headers
+                });
+
+                if (!response.ok) throw new Error('خطا در حذف تسک');
+                allTasks = allTasks.filter(t => t.id !== taskId);
+                renderTasks();
+                showMessage('🗑️ تسک حذف شد!', 'success');
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // ====== FILTER TASKS ======
+        function filterTasks(filter) {
+            currentFilter = filter;
+
+            // Update active button
+            document.querySelectorAll('.filter-bar button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderTasks();
+        }
+
+        // ====== VIEW DETAIL (using detail_url from serializer) ======
+        function viewDetail(url) {
+            // Since you have relative URL from serializer, prepend base
+            const fullUrl = `http://localhost:8000${url}`;
+            fetch(fullUrl, { headers })
+                .then(res => res.json())
+                .then(task => {
+                    alert(`
+                        📌 عنوان: ${task.title}
+                        📝 توضیحات: ${task.description || 'ندارد'}
+                        ✅ وضعیت: ${task.is_done ? 'انجام شده' : 'انجام نشده'}
+                        📅 تاریخ: ${new Date(task.created_at).toLocaleDateString('fa-IR')}
+                    `);
+                })
+                .catch(err => showMessage('خطا در دریافت جزئیات', 'error'));
+        }
+
+        // ====== SHOW MESSAGE ======
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type === 'error' ? 'error' : ''}" style="
+                padding: 1rem;
+                border-radius: 10px;
+                margin-bottom: 1rem;
+                background: ${type === 'error' ? '#fed7d7' : '#c6f6d5'};
+                color: ${type === 'error' ? '#c53030' : '#276749'};
+            ">${text}</div>`;
+
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // ====== ENTER KEY SUPPORT ======
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+    </script>
+</body>
+</html>

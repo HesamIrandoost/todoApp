@@ -1,10 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View, TemplateView
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from .models import Task
 
 app_name = "todo"
+
+# test to api
+class TaskListViewAPI(TemplateView):
+    template_name = "todo/task_list_api.html"
 
 
 class TaskListView(LoginRequiredMixin, ListView):

@@ -5,6 +5,7 @@ from .views import (
     TaskUpdateView,
     TaskDeleteView,
     TaskToggleDoneView,
+    TaskListViewAPI
 )
 
 app_name = "todo"
@@ -16,4 +17,7 @@ urlpatterns = [
     path("<int:pk>/delete/", TaskDeleteView.as_view(), name="task_delete"),
     path("<int:pk>/toggle/", TaskToggleDoneView.as_view(), name="task_toggle"),
     path("api/v1/", include("todo.api.v1.urls")),
+
+    # test to api
+    path("todoapi/", TaskListViewAPI.as_view(), name="task_list_api"),
 ]

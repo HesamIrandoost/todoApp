@@ -2,12 +2,6 @@ from rest_framework import serializers
 from todo.models import Task
 from rest_framework.reverse import reverse
 
-# class TaskSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Task
-#         fields = ['id', 'user', 'title', 'description', 'is_done', 'created_at']
-#         read_only_fields = ['user', 'created_at']
-
 
 class TaskSerializer(serializers.ModelSerializer):
     detail_url = serializers.SerializerMethodField()
