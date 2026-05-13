@@ -1,0 +1,32 @@
+services:
+  web:
+    container_name: notes_django_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+#   smpt4dev:
+#     image: rnwood/smpt4dev:v3
+#     restart: always 
+#     ports:
+#     # web panel
+#       - '5000:80'
+#     # smpt
+#       - '25:25'
+#     # imap
+#       - '143:143'
+#     volumes:
+#       - smpt4dev-data:/smpt4dev
+#     environment:
+#       - ServerOptions__HostName=smpt4dev
+    
+# volumes:
+#   smpt4dev-data:

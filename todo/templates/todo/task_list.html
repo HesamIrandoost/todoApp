@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body">
+        <h3 class="mb-3">📝 Todo List</h3>
+
+        <a href="{% url 'todo:task_create' %}" class="btn btn-primary mb-3">Add Task</a>
+
+        <ul class="list-group">
+            {% for task in tasks %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    
+                    <span class="{% if task.is_done %}text-decoration-line-through text-muted{% endif %}">
+                        {{ task.title }}
+                    </span>
+
+                    <div class="btn-group">
+                        <form method="post" action="{% url 'todo:task_toggle' task.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm {% if task.is_done %}btn-secondary{% else %}btn-success{% endif %}">
+                                {% if task.is_done %}
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                {% else %}
+                                    <i class="bi bi-check-circle"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        <a href="{% url 'todo:task_update' task.pk %}" class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+                        <a href="{% url 'todo:task_delete' task.pk %}" class="btn btn-sm btn-danger">
+                            Delete
+                        </a>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-center">No tasks yet 😴</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

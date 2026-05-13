@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body">
+        <h3 class="mb-3">Task Form</h3>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-success">Save</button>
+            <a href="{% url 'todo:task_list' %}" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

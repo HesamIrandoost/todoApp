@@ -1,0 +1,25 @@
+# HTML Pages
+/
+ /create/
+ /<id>/edit/
+ /<id>/delete/
+ /<id>/toggle/
+
+# Accounts (Auth)
+ /accounts/register/
+ /accounts/login/
+ /accounts/logout/
+
+# API (DRF)
+ /api/v1/tasks/
+ /api/v1/tasks/<id>/
+ /api/v1/docs/
+ /api/v1/redoc/
+
+# Admin
+ /admin/
+
+# DRF Login (Browsable API)
+ /api-auth/login/
+ /api-auth/logout/
+

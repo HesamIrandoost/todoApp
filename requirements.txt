@@ -1,0 +1,23 @@
+# main package
+Django==6.0.1 -i https://mirror-pypi.runflare.com/simple
+djangorestframework==3.16.1 -i https://mirror-pypi.runflare.com/simple
+Pillow -i https://mirror-pypi.runflare.com/simple
+python-decouple -i https://mirror-pypi.runflare.com/simple
+
+# thirty package
+django-filter -i https://mirror-pypi.runflare.com/simple
+drf-yasg -i https://mirror-pypi.runflare.com/simple
+djoser -i https://mirror-pypi.runflare.com/simple
+# black -i https://mirror-pypi.runflare.com/simple
+# flake8 -i https://mirror-pypi.runflare.com/simple
+asgiref==3.11.0 -i https://mirror-pypi.runflare.com/simple
+sqlparse==0.5.5 -i https://mirror-pypi.runflare.com/simple
+django-extensions -i https://mirror-pypi.runflare.com/simple
+
+#email
+django-mail-templated -i https://mirror-pypi.runflare.com/simple
+
+pytest
+pytest-django
+python-dotenv
+faker

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body text-center">
+        <h4>Are you sure?</h4>
+        <p>{{ object.title }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger">Yes, delete</button>
+            <a href="{% url 'todo:task_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
