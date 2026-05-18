@@ -26,8 +26,8 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        user = User.objects.create_user(
-            email=self.fake.email(), password="qwe123QWE@"
+        user = User.objects.get(
+            email="admin@gmail.com"
         )
 
         for _ in range(20):
