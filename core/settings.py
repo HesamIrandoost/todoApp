@@ -60,7 +60,9 @@ INSTALLED_APPS = [
     "django_filters",
     "django_extensions",
     "djoser",
-    # 'mail_templated'
+    'mail_templated',
+
+
 ]
 
 MIDDLEWARE = [
@@ -165,11 +167,20 @@ REST_FRAMEWORK = {
 }
 
 # # email cofifurations
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_USE_TLS = False
-# EMAIL_HOST = 'smpt4dev'
-# EMAIL_HOST_USER = ''
-# EMAIL_HOST_PASSWORD = ''
-# EMAIL_PORT = 25
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = False
+# EMAIL_HOST = 'smtp4dev'
+EMAIL_HOST = '127.0.0.1'
+EMAIL_HOST_USER = 'admin@gmail.com'
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 25
+
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # نتیجه کارها هم توی Redis
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'

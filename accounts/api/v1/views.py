@@ -11,6 +11,8 @@ from accounts.models import Profile
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 
+from mail_templated import EmailMessage
+
 User = get_user_model()
 
 
@@ -104,3 +106,14 @@ class TestEmailSent(generics.GenericAPIView):
                 "to@example.com",
             ],
         )
+
+# class ActivationResendSerializer(APIView):
+#     serializer_class = serializers.ActivationResendSerializer
+
+    
+#     def post(self, request, *args, **kwargs):
+#         serializer =ActivationResendSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user_obj = serializers.validated_data['user']
+#             token = self.get_tokens_for_user(user_obj)
+#             email_obj = EmailMessage('email/hello.tpl', )

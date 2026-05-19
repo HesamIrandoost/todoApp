@@ -21,5 +21,9 @@ pytest
 pytest-django
 python-dotenv
 faker
+
+# cashe bg proccess
 celery
+Redis
+
 # -i https://mirror-pypi.runflare.com/simple

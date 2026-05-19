@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.contrib.auth.views import LoginView, LogoutView
@@ -5,6 +6,12 @@ from django.contrib.auth import login
 from .models import User
 from .forms import RegisterForm, LoginForm
 
+
+from .tasks import sendmail
+
+def send_email_view(request):
+    sendmail.delay()
+    return HttpResponse('<h1>done</h1>')
 
 class RegisterView(CreateView):
     model = User
