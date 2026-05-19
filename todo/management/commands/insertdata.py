@@ -30,9 +30,10 @@ class Command(BaseCommand):
             email="admin@gmail.com"
         )
 
-        for _ in range(20):
+        for _ in range(8):
             Task.objects.create(
                 user=user,
                 title=self.fake.paragraph(nb_sentences=1),
                 description=self.fake.paragraph(nb_sentences=6),
+                is_done=True
             )

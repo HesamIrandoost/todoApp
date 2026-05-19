@@ -29,3 +29,5 @@ media/
 .vscode/
 .idea/
 .DS_Store
+
+celerybeat-schedule
