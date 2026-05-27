@@ -12,7 +12,7 @@ from django.views.decorators.cache import cache_page
 from rest_framework.authentication import TokenAuthentication
 
 
-@method_decorator(cache_page(60 * 2))
+# @method_decorator(cache_page(60 * 2))
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]

@@ -9,30 +9,11 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
-from dotenv import load_dotenv
-
-load_dotenv()
 from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-# یا ساده‌تر:
-# ALLOWED_HOSTS = ["*"]  # فقط برای توسعه
-
-DEBUG = True
-# DEBUG = os.getenv("DEBUG") == "0"
-SECRET_KEY = os.getenv("SECRET_KEY")
-# ALLOWED_HOSTS = ["*"]
-
-# اصلاح این خط - مقدار پیش‌فرض بده اگر متغیر محیطی وجود نداشت
-# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
-ALLOWED_HOSTS = ['*']
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -96,17 +77,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -142,15 +112,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "static/"
-
-STATICFILES_DIRS = [
-    BASE_DIR / "staticfiles",
-]
 
 
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media/"
 
 
 REST_FRAMEWORK = {
