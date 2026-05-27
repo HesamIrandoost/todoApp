@@ -6,12 +6,17 @@ from todo.models import Task
 from .serializers import TaskSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 # Create your views here.
+from rest_framework.authentication import TokenAuthentication
 
 
+@method_decorator(cache_page(60 * 2))
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     filter_backends = [
         DjangoFilterBackend,

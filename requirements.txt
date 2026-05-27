@@ -25,5 +25,5 @@ faker
 # cashe bg proccess
 celery
 Redis
-
+django-celery-beat
 # -i https://mirror-pypi.runflare.com/simple

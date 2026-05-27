@@ -13,7 +13,7 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     'delete-done-tasks-every-10-min': {
-        'task': 'todo.tasks.delete_done_tasks',  # مسیر درست
+        'task': 'todo.tasks.delete_done_tasks',  
         'schedule': crontab(minute='*/20'), 
     },
 }

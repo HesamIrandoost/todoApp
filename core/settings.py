@@ -25,13 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # یا ساده‌تر:
 # ALLOWED_HOSTS = ["*"]  # فقط برای توسعه
 
-
-DEBUG = os.getenv("DEBUG") == "1"
+DEBUG = True
+# DEBUG = os.getenv("DEBUG") == "0"
 SECRET_KEY = os.getenv("SECRET_KEY")
 # ALLOWED_HOSTS = ["*"]
 
 # اصلاح این خط - مقدار پیش‌فرض بده اگر متغیر محیطی وجود نداشت
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
+# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -159,8 +160,8 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+#        "rest_framework.authentication.BasicAuthentication",
+ #       "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
@@ -184,3 +185,10 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Tehran'
+
+
+# # settings.py
+# INSTALLED_APPS = [
+#     'django_celery_beat',
+# ]
+# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
