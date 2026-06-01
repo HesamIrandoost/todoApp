@@ -14,7 +14,7 @@ from .base import *
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
-DEBUG = False
+DEBUG = False       
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(',')
 

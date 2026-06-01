@@ -3,7 +3,7 @@ from .base import *
 
 
 DEBUG = True
-SECRET_KEY = "SECRET_KEY"
+SECRET_KEY = "zczczsx"
 ALLOWED_HOSTS = ['*']
 
 # Database
