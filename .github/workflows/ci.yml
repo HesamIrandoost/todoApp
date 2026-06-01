@@ -1,4 +1,3 @@
-
 name: todo app test
 
 on:
@@ -8,15 +7,29 @@ on:
     branches: [ main ]
 
 jobs:
-
   Test:
-    name: Test
+    name: Test Django App with Docker
     runs-on: ubuntu-latest
+    
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup Docker-Compose
-      run: docker-compose up -d
-    - name: Run Tests
-      run: docker exec backendtodo sh -c "flake8 && pytest ."
-
-  
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker images
+      run: docker-compose build
+    
+    - name: Run migrations
+      run: docker-compose run --rm backendtodo python manage.py migrate --noinput
+    
+    - name: Run flake8 (Linting)
+      run: docker-compose run --rm backendtodo flake8 . --max-line-length=88 --extend-ignore=E203
+    
+    - name: Run tests with pytest
+      run: docker-compose run --rm backendtodo pytest . -v --maxfail=5
+    
+    - name: Bring down containers
+      if: always()  # حتی اگر تست‌ها شکست خوردند، کانتینرها را متوقف کن
+      run: docker-compose down
