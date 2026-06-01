@@ -16,6 +16,17 @@ DATABASES = {
     }
 }
 
+CORS_ALLOW_ALL_ORIGINS = True
+# settings.py
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 STATIC_URL = 'static/'
 
 # ✅ در توسعه از STATICFILES_DIRS استفاده می‌شود

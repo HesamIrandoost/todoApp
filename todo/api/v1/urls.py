@@ -11,7 +11,7 @@ router = DefaultRouter()
 router.register(r"tasks", TaskViewSet, basename="tasks")
 
 
-# Swagger / Redoc
+# Swagger / Redoc   
 schema_view = get_schema_view(
     openapi.Info(
         title="Todo API",

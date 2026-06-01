@@ -4,6 +4,9 @@ djangorestframework==3.16.1
 Pillow 
 python-decouple 
 
+djangorestframework-simplejwt
+
+
 # thirty package
 django-filter 
 drf-yasg 
