@@ -11,8 +11,8 @@ django-cors-headers
 django-filter 
 drf-yasg 
 djoser 
-# black 
-# flake8 
+black 
+flake8 
 asgiref==3.11.0 
 sqlparse==0.5.5 
 django-extensions 

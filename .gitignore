@@ -28,3 +28,4 @@ Thumbs.db
 .DS_Store
 
 # dotenv files (حاوی secret key و پسورد)
+todo-app.zip
