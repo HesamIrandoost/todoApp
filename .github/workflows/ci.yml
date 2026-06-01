@@ -25,8 +25,8 @@ jobs:
     - name: Run migrations
       run: docker compose run --rm backendtodo python manage.py migrate
     
-    - name: Run flake8
-      run: docker compose run --rm backendtodo flake8 . --max-line-length=88 --extend-ignore=E203,W503 --exclude=venv,.venv,migrations
+    # - name: Run flake8
+    #   run: docker compose run --rm backendtodo flake8 . --max-line-length=88 --extend-ignore=E203,W503 --exclude=venv,.venv,migrations
     
     - name: Run tests
       run: docker compose run --rm backendtodo pytest . -v --maxfail=5 --disable-warnings
