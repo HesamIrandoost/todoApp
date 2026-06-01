@@ -7,9 +7,9 @@ services:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
 
-  backend:
+  backendtodo:
     build: .
-    container_name: backend
+    container_name: backendtodo
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app  # کل پروژه را mount می‌کند نه فقط core
@@ -33,7 +33,7 @@ services:
       - PYTHONPATH=/app
     depends_on:
       - redis
-      - backend
+      - backendtodo
 
   smtp4dev:
     image: rnwood/smtp4dev
