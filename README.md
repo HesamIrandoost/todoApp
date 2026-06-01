@@ -1,7 +1,2 @@
-# tasks
-
-- ### add caschng
-- ### add auth password
-- ### add email sent
-- ### add bg proccess
-- ### add load testing
+# todoApp
+a todo project with django, drf, bootstrap
