@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from faker import Faker
 from accounts.models import User
 from todo.models import Task
-
+import random
 
 class Command(BaseCommand):
     help = 'insert domy data'
@@ -30,10 +30,10 @@ class Command(BaseCommand):
             email="admin@gmail.com"
         )
 
-        for _ in range(8):
+        for _ in range(5):
             Task.objects.create(
                 user=user,
                 title=self.fake.paragraph(nb_sentences=1),
                 description=self.fake.paragraph(nb_sentences=6),
-                is_done=True
+                is_done=random.choice([True, False])
             )
