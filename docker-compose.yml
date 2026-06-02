@@ -6,46 +6,76 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - todo_network  
 
   backendtodo:
     build: .
     container_name: backendtodo
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app  # کل پروژه را mount می‌کند نه فقط core
+      - .:/app
     ports:
       - "8000:8000"
     environment:
       - SECRET_KEY=test
       - DEBUG=True
-      - DJANGO_SETTINGS_MODULE=core.settings.deployment  # استفاده از deployment برای توسعه
+      - DJANGO_SETTINGS_MODULE=core.settings.deployment
       - PYTHONPATH=/app
+      - REDIS_URL=redis://redis:6379/0  
     depends_on:
       - redis
+    networks:
+      - todo_network
   
   worker:
     build: .
     command: celery -A core worker --loglevel=info
     volumes:
-      - .:/app  # کل پروژه را mount می‌کند
+      - .:/app
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.deployment
       - PYTHONPATH=/app
+      - REDIS_URL=redis://redis:6379/0  
     depends_on:
       - redis
       - backendtodo
+    networks:
+      - todo_network
+
+  beat:
+    build: .
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.deployment
+      - PYTHONPATH=/app
+      - REDIS_URL=redis://redis:6379/0  
+    depends_on:
+      - redis
+      - backendtodo
+    restart: unless-stopped
+    networks:
+      - todo_network
 
   smtp4dev:
     image: rnwood/smtp4dev
-    restart: always
+    restart: unless-stopped
     ports:
-      - '5000:80'  # Web interface
-      - '25:25'    # SMTP server
-      - '143:143'  # IMAP server
+      - '5000:80'
+      - '25:25'
+      - '143:143'
     volumes:
       - smtp4dev-data:/smtp4dev
     environment:
       - ServerOptions__HostName=smtp4dev
+    networks:
+      - todo_network
 
+networks:
+  todo_network:
+    driver: bridge  
+    
 volumes:
   smtp4dev-data:
