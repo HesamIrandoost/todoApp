@@ -200,18 +200,18 @@ class RequestResetPassword(generics.GenericAPIView):
     serializer_class = RequestResetPasswordSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = RequestResetPasswordSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data.get('email')
+        email = serializer.validated_data['email']
 
         try:
             user = User.objects.get(email=email)
-        
         except User.DoesNotExist:
             return Response(
-                {"detail": "If  email exists, you will receive reset emsil"},
-                status=status.HTTP_200_OK)
-        
+                {"detail": "If email exists, you will receive reset email"},
+                status=status.HTTP_200_OK
+            )
+            
         token = uuid.uuid4().hex
         expires_at = timezone.now() + timedelta(minutes=10)
         PasswordResetToken.objects.create(
@@ -221,60 +221,86 @@ class RequestResetPassword(generics.GenericAPIView):
         )  
 
         reset_link = self.request.build_absolute_uri(
-        f'/reset-password/?token={token}' )
+            f'/accounts/api/v1/reset-password/confirm/?token={token}'
+        )
 
         send_mail(
-                subject="password reset request",
-                message=f"Click the link to reset your password: {reset_link}",
-                from_email=deployment.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False,
-                html_message=f"""
-                <html>
-                    <body>
-                        <p>Hello {user.full_name},</p>
-                        <p>We received a request to reset your password.</p>
-                        <p>
-                            <a href="{reset_link}">Click here to reset your password</a>
-                        </p>
-                        <p>This link is valid for 10 minutes.</p>
-                        <p>If you didn't request this, please ignore this email.</p>
-                    </body>
-                </html>
-                """
-
+            subject="Password Reset Request",
+            message=f"Click the link to reset your password: {reset_link}",
+            from_email=deployment.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+            html_message=f"""
+            <html>
+                <body>
+                    <p>Hello {user.full_name},</p>
+                    <p>We received a request to reset your password.</p>
+                    <p>
+                        <a href="{reset_link}">Click here to reset your password</a>
+                    </p>
+                    <p>This link is valid for 10 minutes.</p>
+                    <p>If you didn't request this, please ignore this email.</p>
+                </body>
+            </html>
+            """
         )
+        
         return Response(
-            {"detail": "If  email exists, you will receive reset email"},
+            {"detail": "If email exists, you will receive reset email"},
             status=status.HTTP_200_OK
         )
-    
+
+
 class SetNewPasswordView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
-
+    
+    def get(self, request, *args, **kwargs):
+        """نمایش فرم (در API فقط توکن را نشان می‌دهد)"""
+        token = request.query_params.get('token')
+        if not token:
+            return Response({"error": "Token is required"}, status=400)
+        
+        # ✅ می‌توانید اعتبار توکن را بررسی کنید
+        try:
+            token_obj = PasswordResetToken.objects.get(token=token)
+            if token_obj.is_used or token_obj.expired_at < timezone.now():
+                return Response({"error": "Token is invalid or expired"}, status=400)
+        except PasswordResetToken.DoesNotExist:
+            return Response({"error": "Token is invalid"}, status=400)
+            
+        return Response({
+            "message": "Please send POST request with new password",
+            "token": token,
+            "example": {
+                "password": "new_password123",
+                "password_confirm": "new_password123"
+            }
+        })
+    
     def post(self, request, *args, **kwargs):
-        serializer = SetNewPasswordSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            validated_data = serializer.validated_data 
-            token_obj = validated_data['token_obj']
-            user = token_obj.user
-            new_password = validated_data['password']   
-            user.set_password(new_password)
-            user.save()                   
+        token = request.query_params.get('token')
         
-            token_obj.is_used = True
-            token_obj.save()
-            
-            return Response(
-                {"message": "change password is successfuly"},
-                status=status.HTTP_200_OK
-            )
-        
+        # اضافه کردن توکن به داده‌ها
+        if token:
+            data = request.data.copy()
+            data['token'] = token
         else:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            data = request.data
             
+        serializer = SetNewPasswordSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
         
+        validated_data = serializer.validated_data 
+        token_obj = validated_data['token_obj']
+        user = token_obj.user
+        new_password = validated_data['password']   
         
+        user.set_password(new_password)
+        user.save()                   
+        token_obj.is_used = True
+        token_obj.save()
+        
+        return Response(
+            {"message": "Password changed successfully"},
+            status=status.HTTP_200_OK
+        )

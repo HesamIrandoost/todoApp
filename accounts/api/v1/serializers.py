@@ -114,53 +114,49 @@ class ChangePasswordSerialier(serializers.Serializer):
 class RequestResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
-    def validate_email(self, value):
-        try:
-            user = User.objects.get(email=value)
-        except User.DoesNotExist:
-            raise serializers.ValidationError({
-                "error" : "email not exit"
-            })
-        return value
     
 class SetNewPasswordSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=250)
     password = serializers.CharField(
         write_only=True,
-        max_length=8,
-        validators=[validate_password])
+        max_length=128,  # 
+        validators=[validate_password]
+    )
     password_confirm = serializers.CharField(
         write_only=True,
-        max_length=8)
+        max_length=128
+    )
     
     def validate(self, attrs):
         if attrs.get('password') != attrs.get('password_confirm'):
             raise serializers.ValidationError({
-                "passweord" : "doesnt not match"
+                "password": "Passwords do not match"
             })
         
         from accounts.models import PasswordResetToken
         from django.utils import timezone
+        
         try:
             token_obj = PasswordResetToken.objects.get(
                 token=attrs.get('token')
             )
         except PasswordResetToken.DoesNotExist:
             raise serializers.ValidationError(
-                {"token" : "token not valid "} )
+                {"token": "Token is not valid"}
+            )
 
         if token_obj.expired_at < timezone.now():
             raise serializers.ValidationError(
-                {"token" : "token is expired "} )
+                {"token": "Token has expired"}
+            )
 
         if token_obj.is_used:
             raise serializers.ValidationError(
-                {"token" : "token is already been used"} )
+                {"token": "Token has already been used"}
+            )
 
-        attrs["token_obj"] = token_obj
-        
+        attrs['token_obj'] = token_obj
         return attrs
-
 class ActivationResendSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
