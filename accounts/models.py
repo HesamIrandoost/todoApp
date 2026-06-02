@@ -51,6 +51,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=250, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=250)

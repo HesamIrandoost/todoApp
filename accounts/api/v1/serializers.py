@@ -77,6 +77,22 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return validated_data
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(source="user.email", read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = (
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "image",
+            "description",
+        )
+        read_only_fields = ["email"]
+
+
 class ChangePasswordSerialier(serializers.Serializer):
 
     old_password = serializers.CharField(required=True)
@@ -95,21 +111,55 @@ class ChangePasswordSerialier(serializers.Serializer):
         return super().validate(attrs)
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(source="user.email", read_only=True)
+class RequestResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
 
-    class Meta:
-        model = Profile
-        fields = (
-            "id",
-            "email",
-            "first_name",
-            "last_name",
-            "image",
-            "description",
-        )
-        read_only_fields = ["email"]
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({
+                "error" : "email not exit"
+            })
+        return value
+    
+class SetNewPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=250)
+    password = serializers.CharField(
+        write_only=True,
+        max_length=8,
+        validators=[validate_password])
+    password_confirm = serializers.CharField(
+        write_only=True,
+        max_length=8)
+    
+    def validate(self, attrs):
+        if attrs.get('password') != attrs.get('password_confirm'):
+            raise serializers.ValidationError({
+                "passweord" : "doesnt not match"
+            })
+        
+        from accounts.models import PasswordResetToken
+        from django.utils import timezone
+        try:
+            token_obj = PasswordResetToken.objects.get(
+                token=attrs.get('token')
+            )
+        except PasswordResetToken.DoesNotExist:
+            raise serializers.ValidationError(
+                {"token" : "token not valid "} )
 
+        if token_obj.expired_at < timezone.now():
+            raise serializers.ValidationError(
+                {"token" : "token is expired "} )
+
+        if token_obj.is_used:
+            raise serializers.ValidationError(
+                {"token" : "token is already been used"} )
+
+        attrs["token_obj"] = token_obj
+        
+        return attrs
 
 class ActivationResendSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

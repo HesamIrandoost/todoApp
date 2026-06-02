@@ -8,6 +8,8 @@ from .serializers import (
     ChangePasswordSerialier,
     ProfileSerializer,
     ActivationResendSerializer,
+    SetNewPasswordSerializer,
+    RequestResetPasswordSerializer
 )
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -15,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from ...models import Profile
+from accounts.models import Profile, PasswordResetToken
 from django.shortcuts import get_object_or_404
 from ..utils import EmailThread
 from mail_templated import EmailMessage
@@ -23,6 +25,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 from django.conf import settings
+from core.settings import deployment
+from django.core.mail import send_mail
+import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 User = get_user_model()
 
@@ -186,3 +193,88 @@ class ActivationResendApiView(generics.GenericAPIView):
     def get_tokens_for_user(self, user):
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
+    
+
+class RequestResetPassword(generics.GenericAPIView):
+    
+    serializer_class = RequestResetPasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = RequestResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+
+        try:
+            user = User.objects.get(email=email)
+        
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "If  email exists, you will receive reset emsil"},
+                status=status.HTTP_200_OK)
+        
+        token = uuid.uuid4().hex
+        expires_at = timezone.now() + timedelta(minutes=10)
+        PasswordResetToken.objects.create(
+            user=user,
+            token=token,
+            expired_at=expires_at
+        )  
+
+        reset_link = self.request.build_absolute_uri(
+        f'/reset-password/?token={token}' )
+
+        send_mail(
+                subject="password reset request",
+                message=f"Click the link to reset your password: {reset_link}",
+                from_email=deployment.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+                html_message=f"""
+                <html>
+                    <body>
+                        <p>Hello {user.full_name},</p>
+                        <p>We received a request to reset your password.</p>
+                        <p>
+                            <a href="{reset_link}">Click here to reset your password</a>
+                        </p>
+                        <p>This link is valid for 10 minutes.</p>
+                        <p>If you didn't request this, please ignore this email.</p>
+                    </body>
+                </html>
+                """
+
+        )
+        return Response(
+            {"detail": "If  email exists, you will receive reset email"},
+            status=status.HTTP_200_OK
+        )
+    
+class SetNewPasswordView(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = SetNewPasswordSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            validated_data = serializer.validated_data 
+            token_obj = validated_data['token_obj']
+            user = token_obj.user
+            new_password = validated_data['password']   
+            user.set_password(new_password)
+            user.save()                   
+        
+            token_obj.is_used = True
+            token_obj.save()
+            
+            return Response(
+                {"message": "change password is successfuly"},
+                status=status.HTTP_200_OK
+            )
+        
+        else:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        
+        
