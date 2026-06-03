@@ -7,6 +7,7 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 
+from todo.api.v1.views import WeatherForecastView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -18,17 +19,17 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 urlpatterns = [
+    
+    path('weather/', WeatherForecastView.as_view(), name='weather-forecast'),
+
+
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("", include("todo.urls")),
 
     path("api-auth/", include("rest_framework.urls")),
 
-    path(
-        "swagger/",
-        schema_view.with_ui("swagger", cache_timeout=0),
-        name="schema-swagger-ui",
-    ),
+    path("swagger/",schema_view.with_ui("swagger", cache_timeout=0),name="schema-swagger-ui",),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
 

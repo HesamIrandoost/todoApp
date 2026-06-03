@@ -16,3 +16,14 @@ class TaskSerializer(serializers.ModelSerializer):
         return reverse(
             "todo:v1-app:tasks-detail", kwargs={"pk": obj.pk}, request=request
         )
+
+
+class HourlyWeatherSerializer(serializers.Serializer):
+    time = serializers.ListField(child=serializers.CharField())
+    temperature_2m = serializers.ListField(child=serializers.FloatField())
+
+class WeatherForecastSerializer(serializers.Serializer):
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+    timezone = serializers.CharField()
+    hourly = HourlyWeatherSerializer()
