@@ -1,6 +1,11 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
     RegistrationSerializer,
     CustomAuthTokenSerializer,
@@ -11,25 +16,20 @@ from .serializers import (
     SetNewPasswordSerializer,
     RequestResetPasswordSerializer
 )
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from accounts.models import Profile, PasswordResetToken
 from django.shortcuts import get_object_or_404
-from ..utils import EmailThread
-from mail_templated import EmailMessage
-from rest_framework_simplejwt.tokens import RefreshToken
-import jwt
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 from django.conf import settings
-from core.settings import deployment
 from django.core.mail import send_mail
-import uuid
 from django.utils import timezone
+from accounts.models import Profile, PasswordResetToken
+from accounts.api.utils import EmailThread
+from accounts.tasks import sendـreset_password_email
+from core.settings import deployment
+from mail_templated import EmailMessage
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 from datetime import timedelta
+import uuid
+import jwt
 
 User = get_user_model()
 
@@ -223,28 +223,12 @@ class RequestResetPassword(generics.GenericAPIView):
         reset_link = self.request.build_absolute_uri(
             f'/accounts/api/v1/reset-password/confirm/?token={token}'
         )
-
-        send_mail(
-            subject="Password Reset Request",
-            message=f"Click the link to reset your password: {reset_link}",
-            from_email=deployment.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-            html_message=f"""
-            <html>
-                <body>
-                    <p>Hello {user.full_name},</p>
-                    <p>We received a request to reset your password.</p>
-                    <p>
-                        <a href="{reset_link}">Click here to reset your password</a>
-                    </p>
-                    <p>This link is valid for 10 minutes.</p>
-                    <p>If you didn't request this, please ignore this email.</p>
-                </body>
-            </html>
-            """
+        sendـreset_password_email.apply_async(
+            args=[user.email, reset_link, user.full_name],
+            countdown=5  
         )
-        
+        # sendـreset_password_email.delay(user.email, reset_link , user.full_name)
+                
         return Response(
             {"detail": "If email exists, you will receive reset email"},
             status=status.HTTP_200_OK
