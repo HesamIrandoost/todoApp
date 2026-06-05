@@ -27,28 +27,23 @@ class TestTaskViewSetList:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 5
 
-    def test_list_tasks_only_shows_user_tasks(self, user):
-        """فقط تسکای خودش رو ببینه"""
+    def test_list_tasks_only_shows_user_tasks(self, authenticated_client, user):
         other_user = User.objects.create_user(
             email="other@example.com",
             full_name="Other User",
             password="pass123"
         )
-        
+
         Task.objects.create(user=user, title="Task 1", is_done=False)
         Task.objects.create(user=user, title="Task 2", is_done=False)
         Task.objects.create(user=other_user, title="Other Task", is_done=False)
 
-        token = Token.objects.create(user=user)
-        client = APIClient()
-        client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-        
         url = reverse("todo:v1-app:tasks-list")
-        response = client.get(url)
-        
+        response = authenticated_client.get(url)
+
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 2
-
+        
     def test_list_tasks_with_filter_is_done(self, authenticated_client, user):
         """فیلتر انجام شده"""
         Task.objects.create(user=user, title="Done Task", is_done=True)
