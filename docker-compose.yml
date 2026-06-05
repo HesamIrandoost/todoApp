@@ -1,3 +1,4 @@
+#docker-compose.yml
 services:
   redis:
     container_name: redis
@@ -9,9 +10,11 @@ services:
     networks:
       - todo_network  
 
-  backendtodo:
-    build: .
-    container_name: backendtodo
+  backendtodo-develop:
+    build:
+      context: .
+      dockerfile: Dockerfile-develop
+    container_name: backendtodo-develop
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -29,7 +32,9 @@ services:
       - todo_network
   
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-develop
     command: celery -A core worker --loglevel=info
     volumes:
       - .:/app
@@ -39,12 +44,15 @@ services:
       - REDIS_URL=redis://redis:6379/0  
     depends_on:
       - redis
-      - backendtodo
+      # حذف: - database (چون نداریم)
+      # حذف: - backendtodo-develop (نیازی نیست)
     networks:
       - todo_network
 
   beat:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-develop
     command: celery -A core beat --loglevel=info
     volumes:
       - .:/app
@@ -54,7 +62,8 @@ services:
       - REDIS_URL=redis://redis:6379/0  
     depends_on:
       - redis
-      - backendtodo
+      # حذف: - database
+      # حذف: - backendtodo-develop
     restart: unless-stopped
     networks:
       - todo_network

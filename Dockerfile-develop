@@ -1,10 +1,11 @@
-#Dockerfile
+# Dockerfile-develop
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y netcat-openbsd
+RUN apt-get update && apt-get install -y \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -19,12 +20,9 @@ RUN mkdir -p /app/staticfiles /app/media && \
 COPY . .
 RUN chown -R appuser:appuser /app
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-RUN chown appuser:appuser /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-
 USER appuser
 
 EXPOSE 8000
+
+# COPY wait-for-redis.sh /app/wait-for-redis.sh
+# RUN chmod +x /app/wait-for-redis.sh
