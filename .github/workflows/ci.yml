@@ -23,11 +23,11 @@ jobs:
       run: docker compose build
     
     - name: Run migrations
-      run: docker compose run --rm backendtodo python manage.py migrate
+      run: docker compose run --rm backendtodo-develop python manage.py migrate
     
  
     - name: Run tests
-      run: docker compose run --rm backendtodo pytest . -v --maxfail=5 --disable-warnings
+      run: docker compose run --rm backendtodo-develop pytest . -v --maxfail=5 --disable-warnings
     
     - name: Cleanup
       if: always()
