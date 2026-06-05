@@ -1,3 +1,4 @@
+#base.py
 """
 Django settings for core project.
 
@@ -27,29 +28,32 @@ LOGOUT_REDIRECT_URL = "accounts:login"
 # Application definition
 
 INSTALLED_APPS = [
-    'corsheaders',  
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
-    "todo",
-    "accounts",
+
+    "todo.apps.TodoConfig",
+    "accounts.apps.AccountsConfig",
+
     "drf_yasg",
     "django_filters",
     "django_extensions",
     "djoser",
     'mail_templated',
+    'corsheaders',  
 
 
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # ← باید اولین باشه
+    'corsheaders.middleware.CorsMiddleware',  
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

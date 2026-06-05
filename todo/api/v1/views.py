@@ -13,40 +13,33 @@ from django.views.decorators.vary import vary_on_headers
 # Create your views here.
 from rest_framework.authentication import TokenAuthentication
 
-
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
-    filter_backends = [
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    ]
-
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["is_done", "created_at"]
     search_fields = ["title"]
     ordering_fields = ["created_at"]
     
-    @method_decorator(cache_page(60 * 13))
-    @method_decorator(vary_on_headers("Authorization"))
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @method_decorator(cache_page(60 * 13))
+    @method_decorator(vary_on_headers("Authorization"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, methods=["post"])
     def toggle_complete(self, request, pk=None):
         task = self.get_object()
         task.is_done = not task.is_done
         task.save()
-        return Response(
-            {"id": task.id, "is_done": task.is_done}, status=status.HTTP_200_OK
-        )
-
-
+        return Response({"id": task.id, "is_done": task.is_done}, status=status.HTTP_200_OK)
 
 
 

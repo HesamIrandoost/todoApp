@@ -17,8 +17,13 @@ asgiref==3.11.0
 sqlparse==0.5.5 
 django-extensions 
 
+# database
+psycopg[binary]
+
 #email
 django-mail-templated 
+
+gunicorn
 
 pytest
 pytest-django

@@ -1,0 +1,118 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    env_file:
+      - .env       
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:                        
+      - todo_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - todo_network
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build: .
+    image: todo_app:latest
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - ./:/app  
+      - ./core/settings/production.py:/app/core/settings/production.py  
+    expose:
+      - "8000"
+    env_file:
+      - .env  
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG} 
+      - DJANGO_SETTINGS_MODULE=core.settings.production
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}
+    depends_on:
+      redis:
+        condition: service_started
+      database:
+        condition: service_healthy
+    networks:
+      - todo_network
+
+  worker:
+    image: todo_app:latest
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - ./:/app  
+      - ./core/settings/production.py:/app/core/settings/production.py  
+    env_file:
+      - .env  
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.production
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - backend
+    networks:
+      - todo_network
+    restart: unless-stopped
+
+  beat:
+    image: todo_app:latest
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - ./:/app  
+      - ./core/settings/production.py:/app/core/settings/production.py  
+    env_file:
+      - .env  
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings.production
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - backend
+    networks:
+      - todo_network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.26-alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/staticfiles
+      - media_volume:/media
+    depends_on:
+      - backend
+    networks:
+      - todo_network
+
+networks:
+  todo_network:
+    driver: bridge
+
+volumes:
+  static_volume:
+  media_volume:
+  redis_data:
+  postgres_data:
