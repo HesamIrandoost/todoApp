@@ -10,8 +10,8 @@ load_dotenv(dotenv_path=env_path)
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'  
 SECRET_KEY = os.getenv("SECRET_KEY")
-# ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(',')
-ALLOWED_HOSTS = ("*")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(',')
+# ALLOWED_HOSTS = ("*")
 
 
 DATABASES = {
